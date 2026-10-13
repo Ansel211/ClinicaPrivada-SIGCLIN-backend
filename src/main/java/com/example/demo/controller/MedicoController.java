@@ -15,7 +15,6 @@ import com.example.demo.repository.MedicoRepository;
 
 @RestController
 @RequestMapping("/api/medicos")
-@CrossOrigin(origins = "*") // Permite la comunicación con Angular sin bloqueos CORS
 public class MedicoController {
 
     @Autowired
