@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class CitaDTO {
+
     private String nombrePaciente;
     private Long idMedico;
     private LocalDate fecha;
