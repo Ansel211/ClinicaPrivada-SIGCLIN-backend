@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,6 +30,15 @@ public class CitaController {
 
     @PostMapping
     public ResponseEntity<?> registrarCita(@RequestBody CitaDTO dto) {
+
+        boolean ocupado = citaRepository.existsByMedicoIdAndFechaAndHora(
+            dto.getIdMedico(), 
+            dto.getFecha(), 
+            dto.getHora()
+        );
+        if (ocupado) {
+            return ResponseEntity.badRequest().body("El médico ya tiene una cita programada para esa fecha y hora.");
+        }
         Medico medico = medicoRepository.findById(dto.getIdMedico())
                 .orElseThrow(() -> new RuntimeException("Médico no encontrado"));
 
@@ -40,5 +50,12 @@ public class CitaController {
 
         Cita guardada = citaRepository.save(nuevaCita);
         return ResponseEntity.ok(guardada);
+    }
+
+    @GetMapping("/hoy/total")
+    public ResponseEntity<Long> obtenerTotalCitasHoy() {
+    // Cuenta las citas filtradas por la fecha actual de la BD
+    long totalHoy = citaRepository.countByFecha(LocalDate.now());
+    return ResponseEntity.ok(totalHoy);
     }
 }
