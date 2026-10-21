@@ -3,20 +3,20 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "medicos")
+@Table(name = "medicos", schema = "public")
 public class Medico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 150)
+    @Column(name = "nombre", nullable = false)
     private String nombre;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "especialidad", nullable = false)
     private String especialidad;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "disponibilidad", nullable = false)
     private String disponibilidad;
 
     public Medico() {}
