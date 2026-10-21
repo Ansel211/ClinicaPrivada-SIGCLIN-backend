@@ -4,7 +4,7 @@ public class AuthResponseDTO {
     private String token;
     private String username;
     private String nombreCompleto;
-    private String mensaje;
+    private String message;
 
     public AuthResponseDTO() {}
 
@@ -12,7 +12,7 @@ public class AuthResponseDTO {
         this.token = token;
         this.username = username;
         this.nombreCompleto = nombreCompleto;
-        this.mensaje = mensaje;
+        this.message = message;
     }
 
     public String getToken() { return token; }
@@ -24,6 +24,6 @@ public class AuthResponseDTO {
     public String getNombreCompleto() { return nombreCompleto; }
     public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
 
-    public String getMensaje() { return mensaje; }
-    public void setMensaje(String mensaje) { this.mensaje = mensaje; }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 }

@@ -24,7 +24,7 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+  //busca el usuario en la base de datos 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO request) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(request.getUsername());
