@@ -1,9 +1,9 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-
 @Entity
 @Table(name = "citas")
 public class Cita {
@@ -17,11 +17,12 @@ public class Cita {
 
     @ManyToOne
     @JoinColumn(name = "id_medico")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Medico medico;
 
     private LocalDate fecha;
     private LocalTime hora;
-    private String estado = "PENDIENTE";
+    private String estado = "pendiente";
 
     public Cita() {}
 
