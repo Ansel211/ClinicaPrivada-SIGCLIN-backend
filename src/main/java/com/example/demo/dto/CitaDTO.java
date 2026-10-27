@@ -9,6 +9,7 @@ public class CitaDTO {
     private MedicoDTO medico;
     private LocalDate fecha;
     private LocalTime hora;
+    private Integer duracionMinutos; // <-- ¡Este campo faltaba!
 
     // Clase interna para mapear { "id": X }
     public static class MedicoDTO {
@@ -30,4 +31,7 @@ public class CitaDTO {
 
     public LocalTime getHora() { return hora; }
     public void setHora(LocalTime hora) { this.hora = hora; }
+
+    public Integer getDuracionMinutos() { return duracionMinutos; }
+    public void setDuracionMinutos(Integer duracionMinutos) { this.duracionMinutos = duracionMinutos; }
 }

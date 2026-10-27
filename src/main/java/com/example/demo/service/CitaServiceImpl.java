@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.exception.ResourceNotFoundException; // Usando tu clase personalizada de la carpeta exception
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Cita;
 import com.example.demo.model.Medico;
 import com.example.demo.repository.CitaRepository;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.dto.CitaDTO;
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -37,20 +36,37 @@ public class CitaServiceImpl implements CitaService {
       Medico medico = medicoRepository.findById(medicoId)
               .orElseThrow(() -> new IllegalArgumentException("El médico seleccionado no existe en la base de datos."));
 
-      if ("ocupado".equalsIgnoreCase(medico.getDisponibilidad())) {
-          throw new IllegalArgumentException("El médico se encuentra actualmente no disponible.");
+      // 1. Obtener la duración enviada desde el frontend (si viene nula, por defecto 30 minutos)
+      int duracionMinutos = (dto.getDuracionMinutos() != null) ? dto.getDuracionMinutos() : 30;
+      
+      LocalTime horaInicioNueva = dto.getHora();
+      LocalTime horaFinNueva = horaInicioNueva.plusMinutes(duracionMinutos);
+
+      // 2. Buscar todas las citas de ese médico en esa misma fecha
+      List<Cita> citasDelDia = citaRepository.findByMedicoIdAndFecha(medicoId, dto.getFecha());
+
+      // 3. Validar si hay cruce de horarios con la duración dinámica
+      for (Cita citaExistente : citasDelDia) {
+          LocalTime horaInicioExistente = citaExistente.getHora();
+          int duracionExistente = (citaExistente.getDuracionMinutos() != null) ? citaExistente.getDuracionMinutos() : 30;
+          LocalTime horaFinExistente = horaInicioExistente.plusMinutes(duracionExistente);
+
+          // Condición matemática de cruce de intervalos: (InicioA < FinB) y (FinA > InicioB)
+          boolean seCruzan = horaInicioNueva.isBefore(horaFinExistente) && horaFinNueva.isAfter(horaInicioExistente);
+          
+          if (seCruzan) {
+              throw new IllegalArgumentException("El médico ya se encuentra ocupado en este horario (Conflicto con cita de " 
+                  + horaInicioExistente + " a " + horaFinExistente + ").");
+          }
       }
 
-      boolean ocupado = citaRepository.existsByMedicoIdAndFechaAndHora(medicoId, dto.getFecha(), dto.getHora());
-      if (ocupado) {
-          throw new IllegalArgumentException("El médico ya tiene una cita programada para esa fecha y hora.");
-      }
-
+      // 4. Guardar la cita con su duración personalizada
       Cita nuevaCita = new Cita();
       nuevaCita.setNombrePaciente(dto.getNombrePaciente());
       nuevaCita.setMedico(medico);
       nuevaCita.setFecha(dto.getFecha());
       nuevaCita.setHora(dto.getHora());
+      nuevaCita.setDuracionMinutos(duracionMinutos);
       nuevaCita.setEstado("pendiente");
 
       return citaRepository.save(nuevaCita);

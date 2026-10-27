@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
 @Entity
 @Table(name = "citas")
 public class Cita {
@@ -22,6 +23,10 @@ public class Cita {
 
     private LocalDate fecha;
     private LocalTime hora;
+    
+    @Column(name = "duracion_minutos")
+    private Integer duracionMinutos = 30; // Por defecto 30 min si no se envía
+
     private String estado = "pendiente";
 
     public Cita() {}
@@ -41,6 +46,9 @@ public class Cita {
 
     public LocalTime getHora() { return hora; }
     public void setHora(LocalTime hora) { this.hora = hora; }
+
+    public Integer getDuracionMinutos() { return duracionMinutos; }
+    public void setDuracionMinutos(Integer duracionMinutos) { this.duracionMinutos = duracionMinutos; }
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
