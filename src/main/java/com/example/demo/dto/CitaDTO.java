@@ -10,16 +10,22 @@ public class CitaDTO {
     private LocalDate fecha;
     private LocalTime hora;
     private Integer duracionMinutos;
-    private String tipoConsulta; // <-- NUEVO CAMPO
+    private String tipoConsulta; 
+    private PacienteDTO paciente; 
 
-    // Clase interna MedicoDTO (se mantiene igual)
+    public static class PacienteDTO {
+        private Long idPaciente;
+        public Long getIdPaciente() { return idPaciente; }
+        public void setIdPaciente(Long idPaciente) { this.idPaciente = idPaciente; }
+    }
+
     public static class MedicoDTO {
         private Long id;
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
     }
 
-    // Getters y Setters existentes...
+    // Getters y Setters
     public String getNombrePaciente() { return nombrePaciente; }
     public void setNombrePaciente(String nombrePaciente) { this.nombrePaciente = nombrePaciente; }
 
@@ -37,4 +43,7 @@ public class CitaDTO {
 
     public String getTipoConsulta() { return tipoConsulta; }
     public void setTipoConsulta(String tipoConsulta) { this.tipoConsulta = tipoConsulta; }
+
+    public PacienteDTO getPaciente() { return paciente; } // <--- Agregado
+    public void setPaciente(PacienteDTO paciente) { this.paciente = paciente; } // <--- Agregado
 }

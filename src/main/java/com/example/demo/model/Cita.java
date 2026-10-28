@@ -19,20 +19,21 @@ public class Cita {
     @Column(name = "tipo_consulta")
     private String tipoConsulta;
 
-    
-    public String getTipoConsulta() { return tipoConsulta; }
-    public void setTipoConsulta(String tipoConsulta) { this.tipoConsulta = tipoConsulta; }
-
     @ManyToOne
     @JoinColumn(name = "id_medico")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Medico medico;
 
+    @ManyToOne
+    @JoinColumn(name = "id_paciente")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Paciente paciente; // <--- Faltaba asegurarlo con la anotación
+
     private LocalDate fecha;
     private LocalTime hora;
     
     @Column(name = "duracion_minutos")
-    private Integer duracionMinutos = 30; // Por defecto 30 min si no se envía
+    private Integer duracionMinutos = 30;
 
     private String estado = "pendiente";
 
@@ -45,8 +46,14 @@ public class Cita {
     public String getNombrePaciente() { return nombrePaciente; }
     public void setNombrePaciente(String nombrePaciente) { this.nombrePaciente = nombrePaciente; }
 
+    public String getTipoConsulta() { return tipoConsulta; }
+    public void setTipoConsulta(String tipoConsulta) { this.tipoConsulta = tipoConsulta; }
+
     public Medico getMedico() { return medico; }
     public void setMedico(Medico medico) { this.medico = medico; }
+
+    public Paciente getPaciente() { return paciente; } // <--- Agregado
+    public void setPaciente(Paciente paciente) { this.paciente = paciente; } // <--- Agregado
 
     public LocalDate getFecha() { return fecha; }
     public void setFecha(LocalDate fecha) { this.fecha = fecha; }
