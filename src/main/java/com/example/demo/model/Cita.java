@@ -16,6 +16,13 @@ public class Cita {
     @Column(name = "nombre_paciente")
     private String nombrePaciente;
 
+    @Column(name = "tipo_consulta")
+    private String tipoConsulta;
+
+    
+    public String getTipoConsulta() { return tipoConsulta; }
+    public void setTipoConsulta(String tipoConsulta) { this.tipoConsulta = tipoConsulta; }
+
     @ManyToOne
     @JoinColumn(name = "id_medico")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

@@ -60,13 +60,14 @@ public class CitaServiceImpl implements CitaService {
           }
       }
 
-      // 4. Guardar la cita con su duración personalizada
+      // Guardamos la cita con su duracion y el tipo de consulta personalizado
       Cita nuevaCita = new Cita();
       nuevaCita.setNombrePaciente(dto.getNombrePaciente());
       nuevaCita.setMedico(medico);
       nuevaCita.setFecha(dto.getFecha());
       nuevaCita.setHora(dto.getHora());
       nuevaCita.setDuracionMinutos(duracionMinutos);
+      nuevaCita.setTipoConsulta(dto.getTipoConsulta()); 
       nuevaCita.setEstado("pendiente");
 
       return citaRepository.save(nuevaCita);
