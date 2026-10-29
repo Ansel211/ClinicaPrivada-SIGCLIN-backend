@@ -1,5 +1,5 @@
 package com.example.demo.model;
-
+import com.example.demo.model.Rol;
 import jakarta.persistence.*;
 
 @Entity
@@ -10,6 +10,9 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "email", unique = true, nullable = false)
+    private String email;
+
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -18,9 +21,13 @@ public class Usuario {
 
     private Boolean estado = true;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "persona_id", referencedColumnName = "id")
     private Persona persona;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol_id")
+    private Rol rol;
 
     public Usuario() {}
 
@@ -39,4 +46,10 @@ public class Usuario {
 
     public Persona getPersona() { return persona; }
     public void setPersona(Persona persona) { this.persona = persona; }
+   
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public Rol getRol() { return rol; }
+    public void setRol(Rol rol) { this.rol = rol; }
 }

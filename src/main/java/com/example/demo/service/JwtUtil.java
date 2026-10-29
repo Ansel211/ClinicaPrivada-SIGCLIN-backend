@@ -30,11 +30,15 @@ public class JwtUtil {
             claims.put("personaId", usuario.getPersona().getId());
             claims.put("names", usuario.getPersona().getNombre() + " " + usuario.getPersona().getApellido());
         }
-        claims.put("username", usuario.getUsername());
+
+        claims.put("email", usuario.getEmail());
+        if (usuario.getRol() != null) {
+            claims.put("role", usuario.getRol().getNombre());
+        }
 
         return Jwts.builder()
                 .claims(claims)
-                .subject(usuario.getUsername())
+                .subject(usuario.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey())
@@ -46,13 +50,17 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public String extractEmail(String token) {
+    return extractClaim(token, Claims::getSubject);
+    }
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     public boolean isTokenValid(String token, Usuario usuario) {
-        final String username = extractUsername(token);
-        return (username.equals(usuario.getUsername())) && !isTokenExpired(token);
+        final String email = extractEmail(token);
+        return (email.equals(usuario.getEmail())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

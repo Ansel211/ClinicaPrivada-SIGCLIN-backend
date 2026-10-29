@@ -13,7 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
@@ -25,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UsuarioRepository usuarioRepository; // <-- ESTA LÍNEA ES LA QUE FALTABA
+    private UsuarioRepository usuarioRepository; 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -39,19 +41,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        final String username = jwtUtil.extractUsername(jwt);
+        final String email = jwtUtil.extractEmail(jwt);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(username);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
 
             if (usuarioOpt.isPresent()) {
                 Usuario usuario = usuarioOpt.get();
 
                 if (jwtUtil.isTokenValid(jwt, usuario)) {
+                    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                      if (usuario.getRol() != null && usuario.getRol().getNombre() != null) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre()));
+                      } else {
+                           // Asignación por defecto en caso de que no tenga rol definido
+                           authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                      }
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             usuario,
                             null,
-                            Collections.emptyList()
+                            authorities
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);

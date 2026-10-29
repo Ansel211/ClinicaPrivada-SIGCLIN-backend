@@ -29,7 +29,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO request) {
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(request.getUsername());
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(request.getEmail());
 
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
@@ -40,14 +40,14 @@ public class AuthController {
             if (passwordMatches) {
                 String nombreCompleto = (usuario.getPersona() != null)
                         ? usuario.getPersona().getNombre() + " " + usuario.getPersona().getApellido()
-                        : usuario.getUsername();
+                        : usuario.getEmail();
 
                 // Generación de token JWT real enviando solo tu objeto usuario
                 String tokenReal = jwtUtil.generateToken(usuario);
 
                 AuthResponseDTO response = new AuthResponseDTO(
                         tokenReal,
-                        usuario.getUsername(),
+                        usuario.getEmail(),
                         nombreCompleto,
                         "Inicio de sesión exitoso"
                 );
