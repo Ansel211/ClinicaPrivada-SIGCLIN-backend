@@ -51,8 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (jwtUtil.isTokenValid(jwt, usuario)) {
                     List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                      if (usuario.getRol() != null && usuario.getRol().getNombre() != null) {
-                        authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre()));
+                      if (usuario.getRol() != null && usuario.getRol().getCodigo() != null) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getCodigo()));
                       } else {
                            // Asignación por defecto en caso de que no tenga rol definido
                            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));

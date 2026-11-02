@@ -33,7 +33,7 @@ public class JwtUtil {
 
         claims.put("email", usuario.getEmail());
         if (usuario.getRol() != null) {
-            claims.put("role", usuario.getRol().getNombre());
+            claims.put("role", usuario.getRol().getCodigo());
         }
 
         return Jwts.builder()

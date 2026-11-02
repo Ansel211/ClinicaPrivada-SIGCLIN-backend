@@ -1,5 +1,6 @@
 package com.example.demo.controller;
-
+import com.example.demo.model.Modulo;
+import java.util.Set;
 import com.example.demo.dto.AuthRequestDTO;
 import com.example.demo.dto.AuthResponseDTO;
 import com.example.demo.model.Usuario;
@@ -45,11 +46,16 @@ public class AuthController {
                 // Generación de token JWT real enviando solo tu objeto usuario
                 String tokenReal = jwtUtil.generateToken(usuario);
 
+                String rolCodigo = (usuario.getRol() != null) ? usuario.getRol().getCodigo() : null;
+                Set<Modulo> modulos = (usuario.getRol() != null) ? usuario.getRol().getModulos() : null;
+
                 AuthResponseDTO response = new AuthResponseDTO(
                         tokenReal,
                         usuario.getEmail(),
                         nombreCompleto,
-                        "Inicio de sesión exitoso"
+                        "Inicio de sesión exitoso",
+                        rolCodigo,
+                        modulos
                 );
 
                 return ResponseEntity.ok(response);
