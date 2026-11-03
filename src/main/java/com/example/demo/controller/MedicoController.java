@@ -15,7 +15,6 @@ import com.example.demo.repository.MedicoRepository;
 
 @RestController
 @RequestMapping("/api/medicos")
-@CrossOrigin(origins = "*")
 public class MedicoController {
 
     @Autowired

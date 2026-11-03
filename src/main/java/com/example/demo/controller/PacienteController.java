@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/pacientes")
-@CrossOrigin(origins = "*") // Permite la comunicación con Angular
 public class PacienteController {
 
     @Autowired
