@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.Set;
 
@@ -22,12 +23,14 @@ public class Rol {
     private Boolean activo;
 
     // Relación M:N con Modulo a través de rol_modulo
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "rol_modulo",
         joinColumns = @JoinColumn(name = "rol_id"),
         inverseJoinColumns = @JoinColumn(name = "modulo_id")
     )
+
+    @JsonIgnoreProperties("roles")
     private Set<Modulo> modulos;
 
     public Rol() {}
