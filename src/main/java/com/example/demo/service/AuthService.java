@@ -51,9 +51,8 @@ public class AuthService {
     }
 
     var token = jwtService.generateToken(usuario, modules);
-
-    AuthResponseDTO response = new AuthResponseDTO();
-    response.setToken(token);
-    return response;
+    return AuthResponseDTO.builder()
+                .token(token)
+                .build();
  }
 }
