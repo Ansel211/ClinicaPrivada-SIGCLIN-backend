@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.model.Modulo;
 import com.example.demo.model.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -23,7 +25,7 @@ public class JwtUtil {
     @Value("3600000") // 1 hora de duración
     private long jwtExpiration;
 
-    public String generateToken(Usuario usuario) {
+    public String generateToken(Usuario usuario, List<Modulo> modules) {
         Map<String, Object> claims = new HashMap<>();
 
         if (usuario.getPersona() != null) {
@@ -32,9 +34,8 @@ public class JwtUtil {
         }
 
         claims.put("email", usuario.getEmail());
-        if (usuario.getRol() != null) {
-            claims.put("role", usuario.getRol().getCodigo());
-        }
+        claims.put("role", usuario.getRol() != null ? usuario.getRol().getCodigo() : null);
+        claims.put("modules", modules); // Guarda los módulos en el token JWT
 
         return Jwts.builder()
                 .claims(claims)
