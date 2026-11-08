@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface ModuloRepository extends JpaRepository<Modulo, Integer> {
 
-    @Query(value = "SELECT m.* FROM modulo m INNER JOIN rol_modulo rm ON m.id_mod = rm.modulo_id WHERE rm.rol_id = :rolId", nativeQuery = true)
-    List<Modulo> findByRolId(@Param("rolId") Integer rolId);
+    @Query(value = "SELECT m.* FROM modulo m INNER JOIN rol_modulo rm ON m.id_mod = rm.modulo_id WHERE rm.rol_id = :rolId ORDER BY m.orden_opcion ASC", nativeQuery = true)
+        List<Modulo> findByRolId(@Param("rolId") Integer rolId);
 }

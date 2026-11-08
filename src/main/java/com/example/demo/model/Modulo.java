@@ -20,13 +20,17 @@ public class Modulo {
     @Column(nullable = false)
     private Boolean activo;
 
+    @Column(name = "orden_opcion")
+    private Integer ordenOpcion;  
+
     public Modulo() {}
 
-    public Modulo(Integer idMod, String descripcion, String url, Boolean activo) {
+    public Modulo(Integer idMod, String descripcion, String url, Boolean activo, Integer ordenOpcion) {
         this.idMod = idMod;
         this.descripcion = descripcion;
         this.url = url;
         this.activo = activo;
+        this.ordenOpcion = ordenOpcion;
     }
 
     // Getters y Setters
@@ -60,5 +64,13 @@ public class Modulo {
 
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+
+    public Integer getOrdenOpcion() {
+         return ordenOpcion;
+    }
+
+    public void setOrdenOpcion(Integer ordenOpcion) {
+        this.ordenOpcion = ordenOpcion;
     }
 }
