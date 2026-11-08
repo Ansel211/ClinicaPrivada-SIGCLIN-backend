@@ -1,17 +1,18 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.CitaDTO;
+import com.example.demo.dto.NCitasXMedicoDTO;
 import com.example.demo.model.Cita;
 import com.example.demo.service.CitaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/citas")
+@RequestMapping("/api/v1/citas")
 public class CitaController {
 
     @Autowired
@@ -34,7 +35,15 @@ public class CitaController {
 
     @GetMapping("/hoy/total")
     public ResponseEntity<Long> obtenerTotalCitasHoy() {
-        // Si no tienes este método en CitaService, puedes dejar la llamada o añadirlo al servicio
-        return ResponseEntity.ok(0L); 
+        return ResponseEntity.ok(0L);
+    }
+
+    @GetMapping("/NCitasXMedico")
+    public ResponseEntity<List<NCitasXMedicoDTO>> getNCitasXMedico() {
+        List<NCitasXMedicoDTO> lista = citaService.obtenerNCitasPorMedico();
+        if (lista.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(lista);
     }
 }

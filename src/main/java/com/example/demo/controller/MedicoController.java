@@ -14,7 +14,7 @@ import com.example.demo.model.Medico;
 import com.example.demo.repository.MedicoRepository;
 
 @RestController
-@RequestMapping("/api/medicos")
+@RequestMapping("/api/v1/medicos")
 public class MedicoController {
 
     @Autowired

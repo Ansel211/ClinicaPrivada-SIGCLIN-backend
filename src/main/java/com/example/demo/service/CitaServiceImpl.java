@@ -10,6 +10,8 @@ import com.example.demo.repository.PacienteRepository; // <--- Importamos el rep
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.dto.CitaDTO;
+import com.example.demo.dto.NCitasXMedicoDTO;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -24,7 +26,7 @@ public class CitaServiceImpl implements CitaService {
     private MedicoRepository medicoRepository;
 
     @Autowired
-    private PacienteRepository pacienteRepository; // <--- 1. INYECTAMOS EL REPOSITORIO DE PACIENTE
+    private PacienteRepository pacienteRepository; 
 
     @Override
     public Cita RegistrarCita(CitaDTO dto) {
@@ -42,23 +44,23 @@ public class CitaServiceImpl implements CitaService {
           throw new IllegalArgumentException("No se puede registrar una cita en una fecha u hora pasada.");
       }
 
-      // 2. BUSCAR AL MÉDICO EN LA BD
+      // Buscar al medico en la bd
       Long medicoId = dto.getMedico().getId();
       Medico medico = medicoRepository.findById(medicoId)
               .orElseThrow(() -> new IllegalArgumentException("El médico seleccionado no existe en la base de datos."));
 
-      // 3. BUSCAR AL PACIENTE EN LA BD POR SU ID
+      // Buscar al paciente en la bd
       Long pacienteId = dto.getPaciente().getIdPaciente();
       Paciente paciente = pacienteRepository.findById(pacienteId)
               .orElseThrow(() -> new IllegalArgumentException("El paciente seleccionado no existe en la base de datos."));
 
-      // 4. Obtener la duración enviada desde el frontend (por defecto 30 min)
+      // Obtener la duracion enviada en el DTO, si no se envia, asumimos 30 minutos por defecto
       int duracionMinutos = (dto.getDuracionMinutos() != null) ? dto.getDuracionMinutos() : 30;
       
       LocalTime horaInicioNueva = dto.getHora();
       LocalTime horaFinNueva = horaInicioNueva.plusMinutes(duracionMinutos);
 
-      // 5. Buscar todas las citas de ese médico en esa misma fecha para validar cruces
+      //Buscar todas las citas del médico en la fecha especificada para validar conflictos de horario
       List<Cita> citasDelDia = citaRepository.findByMedicoIdAndFecha(medicoId, dto.getFecha());
 
       for (Cita citaExistente : citasDelDia) {
@@ -74,9 +76,9 @@ public class CitaServiceImpl implements CitaService {
           }
       }
 
-      // 6. GUARDAR LA CITA ENLAZANDO AL PACIENTE Y AL MÉDICO
+      // Guardamos la nueva cita en la base de datos
       Cita nuevaCita = new Cita();
-      nuevaCita.setPaciente(paciente); // <--- Asignamos el objeto Paciente encontrado
+      nuevaCita.setPaciente(paciente); 
       nuevaCita.setMedico(medico);
       nuevaCita.setFecha(dto.getFecha());
       nuevaCita.setHora(dto.getHora());
@@ -93,6 +95,11 @@ public class CitaServiceImpl implements CitaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cita no encontrada con id: " + id));
         cita.setEstado(nuevoEstado);
         return citaRepository.save(cita);
+    }
+
+    @Override
+    public List<NCitasXMedicoDTO> obtenerNCitasPorMedico() {
+        return citaRepository.obtenerNCitasPorMedico();
     }
 
     @Override

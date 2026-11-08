@@ -34,12 +34,11 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 .requestMatchers(
                     "/api/v1/auth/**",
-                    "/api/auth/**",
                     "/api/v1/roles/**",     
                     "/api/v1/modulos/**",
-                    "/api/medicos/**",
-                    "/api/citas/**",
-                    "/api/pacientes/**",
+                    "/api/v1/citas/**",
+                    "/api/v1/medicos/**",
+                    "/api/v1/pacientes/**",
                     "/api/v1/personas/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
