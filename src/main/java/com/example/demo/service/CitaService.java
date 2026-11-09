@@ -1,8 +1,11 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.CitaCalendarioDTO;
 import com.example.demo.dto.CitaDTO;
 import com.example.demo.dto.NCitasXMedicoDTO;
 import com.example.demo.model.Cita;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface CitaService {
@@ -11,4 +14,5 @@ public interface CitaService {
     List<Cita> ListarCitas();
     List<Cita> ListarCitasPorMedico(long medicoId);
     List<NCitasXMedicoDTO> obtenerNCitasPorMedico();
+    List<CitaCalendarioDTO> obtenerCitasCalendario(Long idMedico, LocalDate fechaInicio, LocalDate fechaFin);
 }

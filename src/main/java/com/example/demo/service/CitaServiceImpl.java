@@ -3,18 +3,21 @@ package com.example.demo.service;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Cita;
 import com.example.demo.model.Medico;
-import com.example.demo.model.Paciente; // <--- Importamos el modelo Paciente
+import com.example.demo.model.Paciente;
 import com.example.demo.repository.CitaRepository;
 import com.example.demo.repository.MedicoRepository;
-import com.example.demo.repository.PacienteRepository; // <--- Importamos el repositorio de Paciente
+import com.example.demo.repository.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.dto.CitaDTO;
 import com.example.demo.dto.NCitasXMedicoDTO;
+import com.example.demo.dto.CitaCalendarioDTO;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service 
 public class CitaServiceImpl implements CitaService {
@@ -34,7 +37,6 @@ public class CitaServiceImpl implements CitaService {
         throw new IllegalArgumentException("Debe seleccionar un médico válido.");
       }
 
-      // Validamos que se haya enviado un paciente con su ID
       if (dto.getPaciente() == null || dto.getPaciente().getIdPaciente() == null) {
         throw new IllegalArgumentException("Debe seleccionar un paciente válido.");
       }
@@ -44,23 +46,19 @@ public class CitaServiceImpl implements CitaService {
           throw new IllegalArgumentException("No se puede registrar una cita en una fecha u hora pasada.");
       }
 
-      // Buscar al medico en la bd
       Long medicoId = dto.getMedico().getId();
       Medico medico = medicoRepository.findById(medicoId)
               .orElseThrow(() -> new IllegalArgumentException("El médico seleccionado no existe en la base de datos."));
 
-      // Buscar al paciente en la bd
       Long pacienteId = dto.getPaciente().getIdPaciente();
       Paciente paciente = pacienteRepository.findById(pacienteId)
               .orElseThrow(() -> new IllegalArgumentException("El paciente seleccionado no existe en la base de datos."));
 
-      // Obtener la duracion enviada en el DTO, si no se envia, asumimos 30 minutos por defecto
       int duracionMinutos = (dto.getDuracionMinutos() != null) ? dto.getDuracionMinutos() : 30;
       
       LocalTime horaInicioNueva = dto.getHora();
       LocalTime horaFinNueva = horaInicioNueva.plusMinutes(duracionMinutos);
 
-      //Buscar todas las citas del médico en la fecha especificada para validar conflictos de horario
       List<Cita> citasDelDia = citaRepository.findByMedicoIdAndFecha(medicoId, dto.getFecha());
 
       for (Cita citaExistente : citasDelDia) {
@@ -76,7 +74,6 @@ public class CitaServiceImpl implements CitaService {
           }
       }
 
-      // Guardamos la nueva cita en la base de datos
       Cita nuevaCita = new Cita();
       nuevaCita.setPaciente(paciente); 
       nuevaCita.setMedico(medico);
@@ -110,5 +107,46 @@ public class CitaServiceImpl implements CitaService {
     @Override
     public List<Cita> ListarCitasPorMedico(long medicoId) {
         return citaRepository.findByMedicoId(medicoId);
+    }
+
+    // --- NUEVO MÉTODO PARA EL CALENDARIO ---
+    @Override
+    public List<CitaCalendarioDTO> obtenerCitasCalendario(Long idMedico, LocalDate fechaInicio, LocalDate fechaFin) {
+        if (fechaInicio == null) fechaInicio = LocalDate.now().minusMonths(1);
+        if (fechaFin == null) fechaFin = LocalDate.now().plusMonths(3);
+
+        List<Cita> citas;
+        if (idMedico != null) {
+            citas = citaRepository.findByMedicoIdAndFechaBetween(idMedico, fechaInicio, fechaFin);
+        } else {
+            citas = citaRepository.findByFechaBetween(fechaInicio, fechaFin);
+        }
+
+        return citas.stream().map(cita -> {
+            LocalDateTime startDateTime = LocalDateTime.of(cita.getFecha(), cita.getHora());
+            int duracion = cita.getDuracionMinutos() != null ? cita.getDuracionMinutos() : 30;
+            LocalDateTime endDateTime = startDateTime.plusMinutes(duracion);
+
+            String nombrePacienteStr = (cita.getPaciente() != null && cita.getPaciente().getNombres() != null)
+                ? cita.getPaciente().getNombres() + " " + (cita.getPaciente().getApellidoPaterno() != null ? cita.getPaciente().getApellidoPaterno() : "")
+                : (cita.getNombrePaciente() != null ? cita.getNombrePaciente() : "Paciente sin nombre");
+
+            String nombreMedicoStr = (cita.getMedico() != null && cita.getMedico().getNombre() != null)
+                ? "Dr. " + cita.getMedico().getNombre()
+                : "Médico General";
+
+            String title = "Cita: " + nombrePacienteStr.trim() + " (" + (cita.getTipoConsulta() != null ? cita.getTipoConsulta() : "General") + ")";
+
+            return new CitaCalendarioDTO(
+                cita.getId(),
+                title,
+                startDateTime,
+                endDateTime,
+                cita.getEstado(),
+                cita.getMedico() != null ? cita.getMedico().getId() : null,
+                nombreMedicoStr,
+                nombrePacienteStr.trim()
+            );
+        }).collect(Collectors.toList());
     }
 }
