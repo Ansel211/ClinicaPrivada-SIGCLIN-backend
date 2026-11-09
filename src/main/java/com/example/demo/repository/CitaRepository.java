@@ -4,6 +4,7 @@ import com.example.demo.dto.NCitasXMedicoDTO;
 import com.example.demo.model.Cita;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +17,12 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     // 2. Obtener la agenda del día para un médico específico
     List<Cita> findByMedicoIdAndFecha(Long medicoId, LocalDate fecha);
+   
+    //Para ver todas las citas en un rango de fechas
+    List<Cita> findByFechaBetween(LocalDate fechaInicio, LocalDate fechaFin);
+   
+    // Para ver las citas de un médico específico en un rango de fechas
+    List<Cita> findByMedicoIdAndFechaBetween(Long idMedico, LocalDate fechaInicio, LocalDate fechaFin);
 
     // 3. Contar cuántas citas hay en total en un día (solicitado por CitaController)
     long countByFecha(LocalDate fecha);
