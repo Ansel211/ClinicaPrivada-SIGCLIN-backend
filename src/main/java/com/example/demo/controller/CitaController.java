@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.CitaCalendarioDTO;
 import com.example.demo.dto.CitaDTO;
+import com.example.demo.dto.CitasPorFechaDTO;
 import com.example.demo.dto.NCitasXMedicoDTO;
 import com.example.demo.model.Cita;
 import com.example.demo.service.CitaService;
@@ -49,6 +50,16 @@ public class CitaController {
         }
         return ResponseEntity.ok(lista);
     }
+    
+    @GetMapping("/CitasPorFecha")
+    public ResponseEntity<List<CitasPorFechaDTO>> getCitasPorFecha() {
+    List<CitasPorFechaDTO> lista = citaService.obtenerCitasPorFecha();
+    if (lista.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+    return ResponseEntity.ok(lista);
+    }
+
     @GetMapping("/calendario")
 public ResponseEntity<List<CitaCalendarioDTO>> obtenerCitasCalendario(
         @RequestParam(required = false) Long idMedico,

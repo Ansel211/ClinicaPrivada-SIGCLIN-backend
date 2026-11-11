@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.example.demo.dto.CitasPorFechaDTO;
 import com.example.demo.dto.NCitasXMedicoDTO;
 import com.example.demo.model.Cita;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,4 +36,9 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
            "FROM Cita c JOIN c.medico m " +
            "GROUP BY m.nombre")
     List<NCitasXMedicoDTO> obtenerNCitasPorMedico();
+    
+    // consulta para dashboard citas por fechaa
+    @Query("SELECT new com.example.demo.dto.CitasPorFechaDTO(CAST(c.fecha AS string), COUNT(c)) " +
+       "FROM Cita c GROUP BY c.fecha ORDER BY c.fecha ASC")
+    List<CitasPorFechaDTO> obtenerCitasPorFecha();
 }

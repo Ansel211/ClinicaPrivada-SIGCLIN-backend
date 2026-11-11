@@ -10,6 +10,7 @@ import com.example.demo.repository.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.dto.CitaDTO;
+import com.example.demo.dto.CitasPorFechaDTO;
 import com.example.demo.dto.NCitasXMedicoDTO;
 import com.example.demo.dto.CitaCalendarioDTO;
 
@@ -97,6 +98,11 @@ public class CitaServiceImpl implements CitaService {
     @Override
     public List<NCitasXMedicoDTO> obtenerNCitasPorMedico() {
         return citaRepository.obtenerNCitasPorMedico();
+    }
+
+    @Override
+    public List<CitasPorFechaDTO> obtenerCitasPorFecha() {
+    return citaRepository.obtenerCitasPorFecha();
     }
 
     @Override
