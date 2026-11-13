@@ -5,6 +5,7 @@ import com.example.demo.dto.NCitasXMedicoDTO;
 import com.example.demo.model.Cita;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -41,4 +42,7 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     @Query("SELECT new com.example.demo.dto.CitasPorFechaDTO(CAST(c.fecha AS string), COUNT(c)) " +
        "FROM Cita c GROUP BY c.fecha ORDER BY c.fecha ASC")
     List<CitasPorFechaDTO> obtenerCitasPorFecha();
+    
+    @Query("SELECT c FROM Cita c WHERE c.medico.id = :idMedico AND c.fecha = :fecha")
+    List<Cita> findCitasPorMedicoYFecha(@Param("idMedico") Long idMedico, @Param("fecha") LocalDate fecha);
 }
