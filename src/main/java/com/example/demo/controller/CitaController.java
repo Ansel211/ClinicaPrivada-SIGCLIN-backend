@@ -156,4 +156,56 @@ public ResponseEntity<List<String>> obtenerCuposLibres(
 }
 
 
+
+@GetMapping("/agenda-semanal")
+public ResponseEntity<com.example.demo.dto.AgendaSemanalDTO> obtenerAgendaSemanal(
+        @RequestParam Long idMedico,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+    try {
+        // 1. Turnos base del médico (Lunes a Domingo)
+        List<com.example.demo.dto.AgendaSemanalDTO.TurnoDTO> turnos = horarioRepository.findByMedicoId(idMedico)
+                .stream()
+                .map(h -> new com.example.demo.dto.AgendaSemanalDTO.TurnoDTO(
+                        h.getDiaSemana(),
+                        h.getHoraInicio().toString().substring(0, 5),
+                        h.getHoraFin().toString().substring(0, 5)
+                ))
+                .collect(Collectors.toList());
+
+        // 2. Citas activas del médico en la semana seleccionada
+        List<com.example.demo.dto.AgendaSemanalDTO.CitaBloqueDTO> citas = citaRepository
+                .findByMedicoIdAndFechaBetween(idMedico, fechaInicio, fechaFin)
+                .stream()
+                .filter(c -> c.getEstado() == null || !c.getEstado().equalsIgnoreCase("cancelada"))
+                .map(c -> {
+                    String nombrePac = c.getNombrePaciente();
+                    if ((nombrePac == null || nombrePac.isBlank()) && c.getPaciente() != null) {
+                        String n = c.getPaciente().getNombres() != null ? c.getPaciente().getNombres() : "";
+                        String a = c.getPaciente().getApellidoPaterno() != null ? c.getPaciente().getApellidoPaterno() : "";
+                        nombrePac = (n + " " + a).trim();
+                    }
+                    if (nombrePac == null || nombrePac.isBlank()) {
+                        nombrePac = "Paciente reservado";
+                    }
+
+                    return new com.example.demo.dto.AgendaSemanalDTO.CitaBloqueDTO(
+                            c.getId(),
+                            c.getFecha().toString(),
+                            c.getHora().toString().substring(0, 5),
+                            c.getDuracionMinutos() != null ? c.getDuracionMinutos() : 30,
+                            nombrePac,
+                            c.getTipoConsulta() != null ? c.getTipoConsulta() : "Consulta",
+                            c.getEstado()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new com.example.demo.dto.AgendaSemanalDTO(turnos, citas));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.badRequest().build();
+    }
+}
+
 }
