@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.NUsuariosXRol;
 import com.example.demo.model.Persona;
 import com.example.demo.repository.PersonaRepository;
 import com.example.demo.repository.UsuarioRepository;
@@ -30,8 +29,4 @@ public class PersonaServiceImpl implements PersonaService {
         return personaRepository.save(persona);
     }
     
-    @Override
-    public List<NUsuariosXRol> getNUsuariosXRol() {
-        return usuarioRepository.getNUsuariosXRol();
-    }
 }
