@@ -1,9 +1,15 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "medicos", schema = "public")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Medico {
 
     @Id
@@ -19,23 +25,9 @@ public class Medico {
     @Column(name = "disponibilidad", nullable = false)
     private String disponibilidad;
 
-    public Medico() {}
-
     public Medico(String nombre, String especialidad, String disponibilidad) {
         this.nombre = nombre;
         this.especialidad = especialidad;
         this.disponibilidad = disponibilidad;
     }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public String getEspecialidad() { return especialidad; }
-    public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
-
-    public String getDisponibilidad() { return disponibilidad; }
-    public void setDisponibilidad(String disponibilidad) { this.disponibilidad = disponibilidad; }
 }

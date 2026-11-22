@@ -1,9 +1,17 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "modulo")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Modulo {
 
     @Id
@@ -21,56 +29,5 @@ public class Modulo {
     private Boolean activo;
 
     @Column(name = "orden_opcion")
-    private Integer ordenOpcion;  
-
-    public Modulo() {}
-
-    public Modulo(Integer idMod, String descripcion, String url, Boolean activo, Integer ordenOpcion) {
-        this.idMod = idMod;
-        this.descripcion = descripcion;
-        this.url = url;
-        this.activo = activo;
-        this.ordenOpcion = ordenOpcion;
-    }
-
-    // Getters y Setters
-    public Integer getIdMod() {
-        return idMod;
-    }
-
-    public void setIdMod(Integer idMod) {
-        this.idMod = idMod;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public Boolean getActivo() {
-        return activo;
-    }
-
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
-    }
-
-    public Integer getOrdenOpcion() {
-         return ordenOpcion;
-    }
-
-    public void setOrdenOpcion(Integer ordenOpcion) {
-        this.ordenOpcion = ordenOpcion;
-    }
+    private Integer ordenOpcion;
 }

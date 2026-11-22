@@ -2,11 +2,18 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "citas")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Cita {
 
     @Id
@@ -27,43 +34,13 @@ public class Cita {
     @ManyToOne
     @JoinColumn(name = "id_paciente")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Paciente paciente; // <--- Faltaba asegurarlo con la anotación
+    private Paciente paciente;
 
     private LocalDate fecha;
     private LocalTime hora;
-    
+
     @Column(name = "duracion_minutos")
     private Integer duracionMinutos = 30;
 
     private String estado = "pendiente";
-
-    public Cita() {}
-
-    // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getNombrePaciente() { return nombrePaciente; }
-    public void setNombrePaciente(String nombrePaciente) { this.nombrePaciente = nombrePaciente; }
-
-    public String getTipoConsulta() { return tipoConsulta; }
-    public void setTipoConsulta(String tipoConsulta) { this.tipoConsulta = tipoConsulta; }
-
-    public Medico getMedico() { return medico; }
-    public void setMedico(Medico medico) { this.medico = medico; }
-
-    public Paciente getPaciente() { return paciente; } // <--- Agregado
-    public void setPaciente(Paciente paciente) { this.paciente = paciente; } // <--- Agregado
-
-    public LocalDate getFecha() { return fecha; }
-    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
-
-    public LocalTime getHora() { return hora; }
-    public void setHora(LocalTime hora) { this.hora = hora; }
-
-    public Integer getDuracionMinutos() { return duracionMinutos; }
-    public void setDuracionMinutos(Integer duracionMinutos) { this.duracionMinutos = duracionMinutos; }
-
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
 }

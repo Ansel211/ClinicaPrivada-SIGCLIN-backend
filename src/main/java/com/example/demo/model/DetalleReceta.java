@@ -2,9 +2,15 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "detalle_receta")
+@Getter
+@Setter
+@NoArgsConstructor
 public class DetalleReceta {
 
     @Id
@@ -29,27 +35,4 @@ public class DetalleReceta {
     @JoinColumn(name = "id_receta", nullable = false)
     @JsonBackReference
     private RecetaMedica receta;
-
-    public DetalleReceta() {}
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getMedicamento() { return medicamento; }
-    public void setMedicamento(String medicamento) { this.medicamento = medicamento; }
-
-    public String getDosis() { return dosis; }
-    public void setDosis(String dosis) { this.dosis = dosis; }
-
-    public String getFrecuencia() { return frecuencia; }
-    public void setFrecuencia(String frecuencia) { this.frecuencia = frecuencia; }
-
-    public String getDuracion() { return duracion; }
-    public void setDuracion(String duracion) { this.duracion = duracion; }
-
-    public String getIndicaciones() { return indicaciones; }
-    public void setIndicaciones(String indicaciones) { this.indicaciones = indicaciones; }
-
-    public RecetaMedica getReceta() { return receta; }
-    public void setReceta(RecetaMedica receta) { this.receta = receta; }
 }

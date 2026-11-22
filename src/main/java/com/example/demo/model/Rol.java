@@ -2,10 +2,19 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Set;
 
 @Entity
 @Table(name = "rol")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Rol {
 
     @Id
@@ -29,33 +38,6 @@ public class Rol {
         joinColumns = @JoinColumn(name = "rol_id"),
         inverseJoinColumns = @JoinColumn(name = "modulo_id")
     )
-
     @JsonIgnoreProperties("roles")
     private Set<Modulo> modulos;
-
-    public Rol() {}
-
-    public Rol(Integer idRol, String codigo, String descripcion, Boolean activo, Set<Modulo> modulos) {
-        this.idRol = idRol;
-        this.codigo = codigo;
-        this.descripcion = descripcion;
-        this.activo = activo;
-        this.modulos = modulos;
-    }
-
-    // Getters y Setters
-    public Integer getIdRol() { return idRol; }
-    public void setIdRol(Integer idRol) { this.idRol = idRol; }
-
-    public String getCodigo() { return codigo; }
-    public void setCodigo(String codigo) { this.codigo = codigo; }
-
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-    public Boolean getActivo() { return activo; }
-    public void setActivo(Boolean activo) { this.activo = activo; }
-
-    public Set<Modulo> getModulos() { return modulos; }
-    public void setModulos(Set<Modulo> modulos) { this.modulos = modulos; }
 }
