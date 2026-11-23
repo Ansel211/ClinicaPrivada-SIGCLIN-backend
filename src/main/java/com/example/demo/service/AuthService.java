@@ -9,6 +9,7 @@ import com.example.demo.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,10 @@ public class AuthService {
     var usuario = usuarioRepository.findByEmail(request.getEmail().trim())
             .orElseThrow(() -> new UsernameNotFoundException("Email no encontrado: " + request.getEmail()));
 
+    if (usuario.getEstado() == null || !usuario.getEstado()) {
+        throw new DisabledException("El usuario se encuentra inactivo. Contacte al administrador.");
+    }
+    
     // Validar contraseña soportando texto plano Y encriptación BCrypt
     boolean passwordMatches = passwordEncoder.matches(request.getPassword(), usuario.getPassword()) 
             || request.getPassword().equals(usuario.getPassword());
