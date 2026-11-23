@@ -37,4 +37,14 @@ public class Usuario {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id")
     private Rol rol;
+
+    public Usuario(Usuario source) {
+        this.id = source.id;
+        this.email = source.email;
+        this.username = source.username;
+        this.password = source.password;
+        this.estado = source.estado;
+        this.persona = source.persona;
+        this.rol = source.rol;
+    }
 }

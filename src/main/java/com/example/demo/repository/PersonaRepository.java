@@ -7,4 +7,5 @@ import com.example.demo.model.Persona;
 
 @Repository
 public interface PersonaRepository extends JpaRepository<Persona, Long> {
+    boolean existsByNumeroDocumento(String numeroDocumento);
 }

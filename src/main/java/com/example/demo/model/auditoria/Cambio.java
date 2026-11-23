@@ -1,0 +1,31 @@
+package com.example.demo.model.auditoria;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "cambio", schema = "auditoria")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Cambio {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_cambio")
+    private Long idCambio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_evento", nullable = false)
+    private Evento evento;
+
+    @Column(name = "nombre_campo", nullable = false, length = 150)
+    private String nombreCampo;
+
+    @Column(name = "valor_anterior", columnDefinition = "TEXT")
+    private String valorAnterior;
+
+    @Column(name = "valor_nuevo", columnDefinition = "TEXT")
+    private String valorNuevo;
+}

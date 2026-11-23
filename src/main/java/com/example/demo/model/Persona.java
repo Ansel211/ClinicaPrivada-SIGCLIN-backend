@@ -34,4 +34,13 @@ public class Persona {
         this.numeroDocumento = numeroDocumento;
         this.correo = correo;
     }
+
+    // Constructor de copia para snapshot de auditoría
+    public Persona(Persona source) {
+        this.id = source.id;
+        this.nombre = source.nombre;
+        this.apellido = source.apellido;
+        this.numeroDocumento = source.numeroDocumento;
+        this.correo = source.correo;
+    }
 }
