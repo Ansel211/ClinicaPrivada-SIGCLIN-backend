@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.UUID;
 
 @Component
@@ -31,21 +33,28 @@ public class AuditoriaInterceptor implements HandlerInterceptor {
 
         // 1. Obtener ID del usuario autenticado desde SecurityContext + BD
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            Long idUsuario = usuarioRepository.findByEmail(auth.getName())
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof com.example.demo.model.Usuario usuarioAuth) {
+            AuditoriaContext.setIdUsuario(usuarioAuth.getId());
+        } else if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            String identificador = auth.getName();
+            Long idUsuario = usuarioRepository.findByEmail(identificador)
+                    .or(() -> usuarioRepository.findByUsername(identificador))
                     .map(u -> u.getId())
                     .orElse(0L);
             AuditoriaContext.setIdUsuario(idUsuario);
         } else {
             AuditoriaContext.setIdUsuario(0L);
         }
+        
+        // 2. IP de origen – solo se confía en la dirección TCP real de la conexión.
+        String ip = normalizarIp(request.getRemoteAddr());
 
-        // 2. IP pura válida para tipo INET en PostgreSQL
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isBlank()) {
-            ip = request.getRemoteAddr();
-        } else {
-            ip = ip.split(",")[0].trim();
+        if ("::1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip) || "127.0.0.1".equals(ip)) {
+            try {
+                ip = InetAddress.getLocalHost().getHostAddress();
+            } catch (java.net.UnknownHostException e) {
+                // Dejar la ip loopback tal cual si falla la resolución
+            }
         }
         AuditoriaContext.setIpOrigen(ip);
 
@@ -59,6 +68,30 @@ public class AuditoriaInterceptor implements HandlerInterceptor {
                 AuditoriaContext.getIdUsuario(), ip, request.getRequestURI());
 
         return true;
+    }
+
+    private String normalizarIp(String ip) {
+        if (ip == null || ip.isBlank()) return ip;
+
+        int zonaIdx = ip.indexOf('%');
+        if (zonaIdx != -1) {
+            ip = ip.substring(0, zonaIdx);
+        }
+
+        String lower = ip.toLowerCase();
+        if (lower.startsWith("::ffff:")) {
+            return ip.substring(7);
+        }
+
+        try {
+            InetAddress addr = InetAddress.getByName(ip);
+            if (addr instanceof Inet4Address) {
+                return addr.getHostAddress();
+            }
+            return addr.getHostAddress();
+        } catch (java.net.UnknownHostException e) {
+            return ip;
+        }
     }
 
     @Override
