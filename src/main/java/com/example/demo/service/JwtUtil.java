@@ -37,7 +37,7 @@ public class JwtUtil {
         claims.put("role", usuario.getRol() != null ? usuario.getRol().getCodigo() : null);
         claims.put("modules", modules); // Guarda los módulos en el token JWT
 
-        return Jwts.builder()
+        return Jwts.builder() //inicia la construccion del token
                 .claims(claims)
                 .subject(usuario.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
