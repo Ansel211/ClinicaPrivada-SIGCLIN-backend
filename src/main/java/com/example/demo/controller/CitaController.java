@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.AgendaSemanalDTO;
 import com.example.demo.dto.CitaCalendarioDTO;
 import com.example.demo.dto.CitaDTO;
 import com.example.demo.dto.CitasPorFechaDTO;
@@ -8,13 +9,11 @@ import com.example.demo.model.Cita;
 import com.example.demo.service.CitaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/citas")
@@ -22,10 +21,6 @@ public class CitaController {
 
     @Autowired
     private CitaService citaService;
-    @Autowired
-    private com.example.demo.repository.HorarioMedicoRepository horarioRepository;
-    @Autowired
-    private com.example.demo.repository.CitaRepository citaRepository; // Asegúrate de tenerlo inyectado
 
     @GetMapping
     public List<Cita> listarCitas() {
@@ -55,157 +50,45 @@ public class CitaController {
         }
         return ResponseEntity.ok(lista);
     }
-    
+
     @GetMapping("/CitasPorFecha")
     public ResponseEntity<List<CitasPorFechaDTO>> getCitasPorFecha() {
-    List<CitasPorFechaDTO> lista = citaService.obtenerCitasPorFecha();
-    if (lista.isEmpty()) {
-        return ResponseEntity.noContent().build();
-    }
-    return ResponseEntity.ok(lista);
+        List<CitasPorFechaDTO> lista = citaService.obtenerCitasPorFecha();
+        if (lista.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/calendario")
-public ResponseEntity<List<CitaCalendarioDTO>> obtenerCitasCalendario(
-        @RequestParam(required = false) Long idMedico,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
-    
-    List<CitaCalendarioDTO> calendario = citaService.obtenerCitasCalendario(idMedico, fechaInicio, fechaFin);
-    return ResponseEntity.ok(calendario);
-}
-
-@GetMapping("/cupos-libres")
-public ResponseEntity<List<String>> obtenerCuposLibres(
-        @RequestParam Long idMedico,
-        @RequestParam String fecha,
-        @RequestParam int duracionMinutos) {
-    
-    System.out.println(">>> [INICIO] Calculando cupos - Medico: " + idMedico + " | Fecha: " + fecha);
-
-    try {
-        java.time.LocalDate fechaCita = java.time.LocalDate.parse(fecha);
-        int diaSemana = fechaCita.getDayOfWeek().getValue();
-
-        System.out.println("1. Buscando horario de trabajo en BD...");
-        List<com.example.demo.model.HorarioMedico> horarios = horarioRepository.findByMedicoIdAndDiaSemana(idMedico, diaSemana);
-        
-        if (horarios.isEmpty()) {
-            System.out.println("-> El médico no atiende este día. Devolviendo lista vacía.");
-            return ResponseEntity.ok(java.util.Collections.emptyList()); 
-        }
-
-        com.example.demo.model.HorarioMedico turno = horarios.get(0); 
-        System.out.println("-> Horario encontrado: " + turno.getHoraInicio() + " a " + turno.getHoraFin());
-
-        System.out.println("2. Buscando citas previamente agendadas...");
-        List<Cita> citasDelDia = citaRepository.findCitasPorMedicoYFecha(idMedico, fechaCita);
-        System.out.println("-> Citas encontradas en BD para este día: " + citasDelDia.size());
-
-        List<String> cuposDisponibles = new java.util.ArrayList<>();
-        java.time.LocalTime horaEvaluada = turno.getHoraInicio();
-        java.time.LocalTime horaFinTurno = turno.getHoraFin();
-
-        System.out.println("3. Generando bloques de " + duracionMinutos + " minutos...");
-        int iteracion = 0;
-
-        // SEGURO ANTI-BUCLE: Máximo 60 iteraciones (equivale a 15 horas de turno)
-        while (iteracion < 60) { 
-            java.time.LocalTime finPosible = horaEvaluada.plusMinutes(duracionMinutos);
-            
-            if (finPosible.isAfter(horaFinTurno)) {
-                System.out.println("-> Límite del turno alcanzado. Bucle terminado.");
-                break; 
-            }
-
-            boolean choca = false;
-            for (Cita c : citasDelDia) {
-                if (c.getHora() == null) continue; // Protección contra datos corruptos en BD
-                
-                java.time.LocalTime cInicio = c.getHora();
-                int duracionCita = (c.getDuracionMinutos() != null) ? c.getDuracionMinutos() : 30;
-                java.time.LocalTime cFin = cInicio.plusMinutes(duracionCita);
-                
-                if (horaEvaluada.isBefore(cFin) && finPosible.isAfter(cInicio)) {
-                    choca = true;
-                    break;
-                }
-            }
-
-            if (!choca) {
-                // Parseo seguro de la hora a String (evita cortes de caracteres)
-                String cupoTexto = horaEvaluada.toString();
-                if (cupoTexto.length() > 5) {
-                    cupoTexto = cupoTexto.substring(0, 5);
-                }
-                cuposDisponibles.add(cupoTexto);
-            }
-            
-            horaEvaluada = horaEvaluada.plusMinutes(15); 
-            iteracion++;
-        }
-
-        System.out.println(">>> [ÉXITO] Cálculo finalizado. Cupos libres generados: " + cuposDisponibles.size());
-        return ResponseEntity.ok(cuposDisponibles);
-
-    } catch (Exception e) {
-        System.out.println("!!! [ERROR FATAL] Algo falló en la lógica o en la Base de Datos !!!");
-        e.printStackTrace();
-        return ResponseEntity.badRequest().build();
+    public ResponseEntity<List<CitaCalendarioDTO>> obtenerCitasCalendario(
+            @RequestParam(required = false) Long idMedico,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        return ResponseEntity.ok(citaService.obtenerCitasCalendario(idMedico, fechaInicio, fechaFin));
     }
-}
 
-
-
-@GetMapping("/agenda-semanal")
-public ResponseEntity<com.example.demo.dto.AgendaSemanalDTO> obtenerAgendaSemanal(
-        @RequestParam Long idMedico,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
-    try {
-        // 1. Turnos base del médico (Lunes a Domingo)
-        List<com.example.demo.dto.AgendaSemanalDTO.TurnoDTO> turnos = horarioRepository.findByMedicoId(idMedico)
-                .stream()
-                .map(h -> new com.example.demo.dto.AgendaSemanalDTO.TurnoDTO(
-                        h.getDiaSemana(),
-                        h.getHoraInicio().toString().substring(0, 5),
-                        h.getHoraFin().toString().substring(0, 5)
-                ))
-                .collect(Collectors.toList());
-
-        // 2. Citas activas del médico en la semana seleccionada
-        List<com.example.demo.dto.AgendaSemanalDTO.CitaBloqueDTO> citas = citaRepository
-                .findByMedicoIdAndFechaBetween(idMedico, fechaInicio, fechaFin)
-                .stream()
-                .filter(c -> c.getEstado() == null || !c.getEstado().equalsIgnoreCase("cancelada"))
-                .map(c -> {
-                    String nombrePac = c.getNombrePaciente();
-                    if ((nombrePac == null || nombrePac.isBlank()) && c.getPaciente() != null) {
-                        String n = c.getPaciente().getNombres() != null ? c.getPaciente().getNombres() : "";
-                        String a = c.getPaciente().getApellidoPaterno() != null ? c.getPaciente().getApellidoPaterno() : "";
-                        nombrePac = (n + " " + a).trim();
-                    }
-                    if (nombrePac == null || nombrePac.isBlank()) {
-                        nombrePac = "Paciente reservado";
-                    }
-
-                    return new com.example.demo.dto.AgendaSemanalDTO.CitaBloqueDTO(
-                            c.getId(),
-                            c.getFecha().toString(),
-                            c.getHora().toString().substring(0, 5),
-                            c.getDuracionMinutos() != null ? c.getDuracionMinutos() : 30,
-                            nombrePac,
-                            c.getTipoConsulta() != null ? c.getTipoConsulta() : "Consulta",
-                            c.getEstado()
-                    );
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(new com.example.demo.dto.AgendaSemanalDTO(turnos, citas));
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.badRequest().build();
+    @GetMapping("/cupos-libres")
+    public ResponseEntity<List<String>> obtenerCuposLibres(
+            @RequestParam Long idMedico,
+            @RequestParam String fecha,
+            @RequestParam int duracionMinutos) {
+        try {
+            return ResponseEntity.ok(citaService.obtenerCuposLibres(idMedico, fecha, duracionMinutos));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
-}
 
+    @GetMapping("/agenda-semanal")
+    public ResponseEntity<AgendaSemanalDTO> obtenerAgendaSemanal(
+            @RequestParam Long idMedico,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        try {
+            return ResponseEntity.ok(citaService.obtenerAgendaSemanal(idMedico, fechaInicio, fechaFin));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

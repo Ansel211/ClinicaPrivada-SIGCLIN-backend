@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.AgendaSemanalDTO;
 import com.example.demo.dto.CitaCalendarioDTO;
 import com.example.demo.dto.CitaDTO;
 import com.example.demo.dto.NCitasXMedicoDTO;
@@ -17,4 +18,6 @@ public interface CitaService {
     List<NCitasXMedicoDTO> obtenerNCitasPorMedico();
     List<CitaCalendarioDTO> obtenerCitasCalendario(Long idMedico, LocalDate fechaInicio, LocalDate fechaFin);
     List<CitasPorFechaDTO> obtenerCitasPorFecha();
+    List<String> obtenerCuposLibres(Long idMedico, String fecha, int duracionMinutos);
+    AgendaSemanalDTO obtenerAgendaSemanal(Long idMedico, LocalDate fechaInicio, LocalDate fechaFin);
 }

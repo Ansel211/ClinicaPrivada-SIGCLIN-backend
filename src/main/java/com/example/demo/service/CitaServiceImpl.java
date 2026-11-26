@@ -13,12 +13,17 @@ import com.example.demo.dto.CitaDTO;
 import com.example.demo.dto.CitasPorFechaDTO;
 import com.example.demo.dto.NCitasXMedicoDTO;
 import com.example.demo.dto.CitaCalendarioDTO;
+import com.example.demo.dto.AgendaSemanalDTO;
+import com.example.demo.model.HorarioMedico;
+import com.example.demo.repository.HorarioMedicoRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
 
 @Service 
 public class CitaServiceImpl implements CitaService {
@@ -31,6 +36,9 @@ public class CitaServiceImpl implements CitaService {
 
     @Autowired
     private PacienteRepository pacienteRepository; 
+
+    @Autowired
+    private HorarioMedicoRepository horarioMedicoRepository;
 
     @Override
     public Cita RegistrarCita(CitaDTO dto) {
@@ -86,6 +94,100 @@ public class CitaServiceImpl implements CitaService {
 
       return citaRepository.save(nuevaCita);
     }
+
+    @Override
+public List<String> obtenerCuposLibres(Long idMedico, String fecha, int duracionMinutos) {
+    LocalDate fechaCita = LocalDate.parse(fecha);
+    int diaSemana = fechaCita.getDayOfWeek().getValue();
+
+    List<HorarioMedico> horarios = horarioMedicoRepository.findByMedicoIdAndDiaSemana(idMedico, diaSemana);
+    if (horarios.isEmpty()) {
+        return Collections.emptyList();
+    }
+
+    HorarioMedico turno = horarios.get(0);
+    List<Cita> citasDelDia = citaRepository.findCitasPorMedicoYFecha(idMedico, fechaCita);
+
+    List<String> cuposDisponibles = new ArrayList<>();
+    LocalTime horaEvaluada = turno.getHoraInicio();
+    LocalTime horaFinTurno = turno.getHoraFin();
+
+    int iteracion = 0;
+    while (iteracion < 60) {
+        LocalTime finPosible = horaEvaluada.plusMinutes(duracionMinutos);
+        if (finPosible.isAfter(horaFinTurno)) {
+            break;
+        }
+
+        boolean choca = false;
+        for (Cita c : citasDelDia) {
+            if (c.getHora() == null) continue;
+
+            LocalTime cInicio = c.getHora();
+            int duracionCita = (c.getDuracionMinutos() != null) ? c.getDuracionMinutos() : 30;
+            LocalTime cFin = cInicio.plusMinutes(duracionCita);
+
+            if (horaEvaluada.isBefore(cFin) && finPosible.isAfter(cInicio)) {
+                choca = true;
+                break;
+            }
+        }
+
+        if (!choca) {
+            String cupoTexto = horaEvaluada.toString();
+            if (cupoTexto.length() > 5) {
+                cupoTexto = cupoTexto.substring(0, 5);
+            }
+            cuposDisponibles.add(cupoTexto);
+        }
+
+        horaEvaluada = horaEvaluada.plusMinutes(15);
+        iteracion++;
+    }
+
+    return cuposDisponibles;
+}
+
+@Override
+public AgendaSemanalDTO obtenerAgendaSemanal(Long idMedico, LocalDate fechaInicio, LocalDate fechaFin) {
+    List<AgendaSemanalDTO.TurnoDTO> turnos = horarioMedicoRepository.findByMedicoId(idMedico)
+            .stream()
+            .map(h -> new AgendaSemanalDTO.TurnoDTO(
+                    h.getDiaSemana(),
+                    h.getHoraInicio().toString().substring(0, 5),
+                    h.getHoraFin().toString().substring(0, 5)
+            ))
+            .collect(Collectors.toList());
+
+    List<AgendaSemanalDTO.CitaBloqueDTO> citas = citaRepository
+            .findByMedicoIdAndFechaBetween(idMedico, fechaInicio, fechaFin)
+            .stream()
+            .filter(c -> c.getEstado() == null || !c.getEstado().equalsIgnoreCase("cancelada"))
+            .map(c -> {
+                String nombrePac = c.getNombrePaciente();
+                if ((nombrePac == null || nombrePac.isBlank()) && c.getPaciente() != null) {
+                    String n = c.getPaciente().getNombres() != null ? c.getPaciente().getNombres() : "";
+                    String a = c.getPaciente().getApellidoPaterno() != null ? c.getPaciente().getApellidoPaterno() : "";
+                    nombrePac = (n + " " + a).trim();
+                }
+                if (nombrePac == null || nombrePac.isBlank()) {
+                    nombrePac = "Paciente reservado";
+                }
+
+                return new AgendaSemanalDTO.CitaBloqueDTO(
+                        c.getId(),
+                        c.getFecha().toString(),
+                        c.getHora().toString().substring(0, 5),
+                        c.getDuracionMinutos() != null ? c.getDuracionMinutos() : 30,
+                        nombrePac,
+                        c.getTipoConsulta() != null ? c.getTipoConsulta() : "Consulta",
+                        c.getEstado()
+                );
+            })
+            .collect(Collectors.toList());
+
+    return new AgendaSemanalDTO(turnos, citas);
+}
 
     @Override
     public Cita CambiarEstado(long id, String nuevoEstado) {
