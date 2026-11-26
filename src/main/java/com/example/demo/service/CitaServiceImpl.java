@@ -208,7 +208,6 @@ public AgendaSemanalDTO obtenerAgendaSemanal(Long idMedico, LocalDate fechaInici
     public Cita CambiarEstado(long id, String nuevoEstado) {
         Cita cita = citaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cita no encontrada con id: " + id));
-        cita.setEstado(nuevoEstado);
 
         Cita anterior = new Cita();
         anterior.setId(cita.getId());
