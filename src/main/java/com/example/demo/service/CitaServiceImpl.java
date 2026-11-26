@@ -20,6 +20,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.example.demo.auditoria.AuditoriaService;
+import org.springframework.transaction.annotation.Transactional;
+
 @Service 
 public class CitaServiceImpl implements CitaService {
 
@@ -30,9 +33,13 @@ public class CitaServiceImpl implements CitaService {
     private MedicoRepository medicoRepository;
 
     @Autowired
-    private PacienteRepository pacienteRepository; 
+    private PacienteRepository pacienteRepository;
+    
+    @Autowired
+    private AuditoriaService auditoriaService;
 
     @Override
+    @Transactional
     public Cita RegistrarCita(CitaDTO dto) {
       if (dto.getMedico() == null || dto.getMedico().getId() == null) {
         throw new IllegalArgumentException("Debe seleccionar un médico válido.");
@@ -84,15 +91,44 @@ public class CitaServiceImpl implements CitaService {
       nuevaCita.setTipoConsulta(dto.getTipoConsulta()); 
       nuevaCita.setEstado("pendiente");
 
-      return citaRepository.save(nuevaCita);
+      Cita citaGuardada = citaRepository.saveAndFlush(nuevaCita);
+        auditoriaService.registrarCreacion(
+                "public",
+                "citas",
+                citaGuardada.getId().toString(),
+                "CITAS"
+        );
+        return citaGuardada;
     }
 
     @Override
+    @Transactional
     public Cita CambiarEstado(long id, String nuevoEstado) {
         Cita cita = citaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cita no encontrada con id: " + id));
         cita.setEstado(nuevoEstado);
-        return citaRepository.save(cita);
+
+        Cita anterior = new Cita();
+        anterior.setId(cita.getId());
+        anterior.setEstado(cita.getEstado());
+        anterior.setFecha(cita.getFecha());
+        anterior.setHora(cita.getHora());
+        anterior.setDuracionMinutos(cita.getDuracionMinutos());
+        anterior.setTipoConsulta(cita.getTipoConsulta());
+
+        cita.setEstado(nuevoEstado);
+        Cita citaActualizada = citaRepository.saveAndFlush(cita);
+
+        auditoriaService.registrarActualizacion(
+                "public",
+                "citas",
+                citaActualizada.getId().toString(),
+                "CITAS",
+                anterior,
+                citaActualizada
+        );
+
+        return citaActualizada;
     }
 
     @Override
