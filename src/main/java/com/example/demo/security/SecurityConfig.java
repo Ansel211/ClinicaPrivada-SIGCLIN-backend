@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers(
+                    "/",
+                    "/actuator/**",
                     "/api/v1/auth/**",
                     "/api/v1/roles/**",     
                     "/api/v1/modulos/**",
